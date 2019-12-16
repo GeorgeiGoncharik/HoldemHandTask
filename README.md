@@ -33,4 +33,4 @@ Running a program on Windows 10 is quite easy. Everything you need to do:
     dotnet HoldemHand.dll
     ```
 7. The program is launched!
-!Screenshot of the Linux application](https://github.com/GeorgeiGoncharik/bootcamp-home-task/blob/master/images/LinStart.png)
+![Screenshot of the Linux application](https://github.com/GeorgeiGoncharik/bootcamp-home-task/blob/master/images/LinStart.png)
