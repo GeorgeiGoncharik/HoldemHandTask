@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <Authors>Georgei Goncharik</Authors>
+    <Company />
+    <Description>Test task for Scala bootcamp from Evolution Gaming</Description>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <Compile Include = "Model\Card.cs"/>
+    <Compile Include = "Model\Hand.cs"/>
+    <Compile Include = "Model\Table.cs"/>
+    <Compile Include = "Program.cs"/>
+  </ItemGroup>
+  
+</Project>
