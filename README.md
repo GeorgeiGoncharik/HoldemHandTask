@@ -4,9 +4,11 @@ Application that implements an algorithm for comparing the strength of Texas Hol
 ### on Windows:
 Running a program on Windows 10 is quite easy. Everything you need to do:
 1. Clone or download the repository and unzip it if necessary
-2. In the **Release** folder, run **HoldemHand.exe** like any other application on Windows 
-3. Everything is done! You should see a console window waiting for the user to enter a string
-![Screenshot of the Windows application](https://github.com/GeorgeiGoncharik/bootcamp-home-task/blob/master/images/WinStart.png)
+2. In the repo folder, run run this command from the command line: 
+3.  ```
+    dotnet run < input.txt (optionally: > output.txt)
+    ```
+![Screenshot of the Windows application](https://github.com/GeorgeiGoncharik/bootcamp-home-task/blob/master/images/runWindows.png)
 ### on Linux (on the example of Ubuntu):
 1. The first thing to do is install the necessary repository. To do this, open a terminal window and issue the following commands: 
     ```
@@ -28,9 +30,9 @@ Running a program on Windows 10 is quite easy. Everything you need to do:
     dotnet --info
     ```
 5. Clone or download the repository and unzip it if necessary
-6. Open a terminal in the **Release** folder and issue the following command:
+6. Open a terminal in the repository folder and issue the following command specifying where to read input:
     ```
-    dotnet HoldemHand.dll
+    dotnet run < input.txt
     ```
 7. The program is launched!
-![Screenshot of the Linux application](https://github.com/GeorgeiGoncharik/bootcamp-home-task/blob/master/images/LinStart.png)
+![Screenshot of the Linux application](https://github.com/GeorgeiGoncharik/bootcamp-home-task/blob/master/images/runLinux.png)
