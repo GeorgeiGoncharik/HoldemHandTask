@@ -47,7 +47,7 @@ namespace HoldemHand
                     Console.Out.WriteLine();
                 }
                 catch (ArgumentOutOfRangeException e) { Console.Out.WriteLine(e.Message); }
-                catch (ArgumentException e) { Console.WriteLine(e.Message); }
+                catch (ArgumentException e) { Console.Out.WriteLine(e.Message); }
 
             }
         }
