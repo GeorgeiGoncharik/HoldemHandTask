@@ -14,18 +14,18 @@ namespace HoldemHand.Model
             {
                 var charValue = infoCard[0];
                 if (charValue == 'T')
-                    Value = 8;
-                else if (charValue == 'J')
                     Value = 9;
-                else if (charValue == 'Q')
+                else if (charValue == 'J')
                     Value = 10;
-                else if (charValue == 'K')
+                else if (charValue == 'Q')
                     Value = 11;
-                else if(charValue == 'A')
+                else if (charValue == 'K')
                     Value = 12;
+                else if(charValue == 'A')
+                    Value = 13;
             }
             else if(intValue >= 2 && intValue <= 9)
-                Value = intValue - 2;
+                Value = intValue - 1;
             else 
                 throw new ArgumentException(
                     $"Incorrect input. first character representing the rank of card {infoCard} is not correctly entered.",

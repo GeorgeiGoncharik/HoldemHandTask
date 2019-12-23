@@ -10,7 +10,6 @@ namespace HoldemHand.Model
         private readonly List<Card> _tableCards;
 
         private List<Card> _tempList = new List<Card>();
-        private List<Card> _sortedList = new List<Card>();
 
         public Table(string info)
         {
@@ -46,6 +45,7 @@ namespace HoldemHand.Model
 
         public List<(int,Hand)> EvaluateManyHands(IEnumerable<Hand> hands)
         {
+            int value;
             var resultHands = new List<(int, Hand)>();
             foreach (var hand in hands)
             {
@@ -53,55 +53,55 @@ namespace HoldemHand.Model
                 cards.AddRange(_tableCards);
                 var theValueHand = SortByValue(cards);
                 var theSuitHand = SortBySuit(cards);
-                _tempList = IsStraightFlush(theValueHand);
+                _tempList = IsStraightFlush(theValueHand, out value);
                 if (_tempList.Count > 0)
                 {
                     cards.RemoveRange(2,5);
-                    resultHands.Add((9, hand));
+                    resultHands.Add((value, hand));
                     continue;
                 }
 
-                _tempList = IsFourKind(theValueHand);
+                _tempList = IsFourKind(theValueHand, out value);
                 if (_tempList.Count > 0)
                 {
                     cards.RemoveRange(2, 5);
-                    resultHands.Add((8, hand));
+                    resultHands.Add((value, hand));
                     continue;
                 }
 
-                _tempList = IsFullHouse(theValueHand);
+                _tempList = IsFullHouse(theValueHand, out value);
                 if (_tempList.Count > 0)
                 {
                     cards.RemoveRange(2, 5);
-                    resultHands.Add((7, hand));
+                    resultHands.Add((value, hand));
                     continue;
                 }
 
-                _tempList = IsFlush(theSuitHand);
+                _tempList = IsFlush(theValueHand, out value);
                 if (_tempList.Count > 0)
                 {
                     cards.RemoveRange(2, 5);
-                    resultHands.Add((6, hand));
+                    resultHands.Add((value, hand));
                     continue;
                 }
 
-                _tempList = IsStraight(theValueHand);
+                _tempList = IsStraight(theValueHand, out value);
                 if (_tempList.Count > 0)
                 {
                     cards.RemoveRange(2, 5);
-                    resultHands.Add((5, hand));
+                    resultHands.Add((value, hand));
                     continue;
                 }
 
-                _tempList = IsThreeKind(theValueHand);
+                _tempList = IsThreeKind(theValueHand, out value);
                 if (_tempList.Count > 0)
                 {
                     cards.RemoveRange(2, 5);
-                    resultHands.Add((4, hand));
+                    resultHands.Add((value, hand));
                     continue;
                 }
 
-                _tempList = IsTwoPair(theValueHand);
+                _tempList = IsTwoPair(theValueHand , out value);
                 if (_tempList.Count > 0)
                 {
                     cards.RemoveRange(2, 5);
@@ -109,21 +109,21 @@ namespace HoldemHand.Model
                     continue;
                 }
 
-                _tempList = IsOnePair(theValueHand);
+                _tempList = IsOnePair(theValueHand, out value);
                 if (_tempList.Count > 0)
                 {
                     cards.RemoveRange(2, 5);
-                    resultHands.Add((2, hand));
+                    resultHands.Add((value, hand));
                     continue;
                 }
 
-                _tempList = HighCard(theValueHand);
+                _tempList = HighCard(theValueHand, out value);
                 if (_tempList.Count <= 0) continue;
                 cards.RemoveRange(2, 5);
-                resultHands.Add((1, hand));
+                resultHands.Add((value, hand));
             }
 
-            return resultHands.OrderBy(x => x.Item1).ThenBy(x => DisplayCards(x.Item2.Cards())).ToList(); //.Select(v => v.Item2).ToList();
+            return resultHands.OrderBy(x => x.Item1).ThenBy(x => DisplayCards(x.Item2.Cards())).ToList();
         }
 
         public string DisplayCards(IEnumerable<Card> input)
@@ -144,26 +144,31 @@ namespace HoldemHand.Model
         }
 
 
-        private List<Card> IsStraightFlush(List<Card> hList) //Five cards in numerical order, all of identical suits
+        private List<Card> IsStraightFlush(List<Card> hList, out int value) //Five cards in numerical order, all of identical suits
         {
             var st = 0;
             _tempList.Clear();
-            List<Card> tempList2 = new List<Card>();
 
-            //Straight check
+            // Flush check
+            
             foreach (var t in hList)
             {
                 var cardCount = hList.Count(card => card.Suit == t.Suit);
-                if (cardCount == 5)
+                if (cardCount >= 5)
                     _tempList.Add(t);
 
                 if (_tempList.Count == 5)
                     break;
             }
             if (_tempList.Count == 0)
+            {
+                value = 0;
                 return new List<Card>();
+            }
 
-            // Flush check
+            var tempList2 = _tempList;
+            //Straight check
+
             for (var i = 0; i < _tempList.Count - 1; i++)
             {
                 if (_tempList[i].Value != _tempList[i + 1].Value)
@@ -174,32 +179,59 @@ namespace HoldemHand.Model
                 if (st == 4)
                 {
                     _tempList.Add(hList[i + 1]);
-                    return tempList2;
+                    value = _tempList[0].Value + 13 * 10;
+                    return _tempList;
                 }
             }
 
+            st = 0;
+            if (tempList2[0].Value == 13) //Ace
+            {
+                for (int i = tempList2.Count - 1, j = 0; i > 0; i--, j++)
+                {
+                    if (tempList2[i].Value != tempList2[0].Value)
+                        if ((tempList2[0].Value - tempList2[i].Value) == 12 - j)
+                        {
+                            st++;
+                            _tempList.Add(tempList2[i]);
+                        }
+                        else
+                            st = 0;
+                    if (st == 4)
+                    {
+                        _tempList.Add(tempList2[0]);
+                        value = 1 + 13 * 10;
+                        return _tempList;
+                    }
+                }
+            }
+            
+            value = 0;
             return new List<Card>();
 
         }
 
-        private List<Card> IsFourKind(List<Card> hList) //Four cards of the same rank, and one side card or ‘kicker’.
+        private List<Card> IsFourKind(List<Card> hList, out int value) //Four cards of the same rank, and one side card or ‘kicker’.
         {
             _tempList.Clear();
 
             foreach (var t in hList)
             {
                 var cardCount = hList.Count(card => card.Value == t.Value);
-                if (cardCount == 4)
+                if (cardCount >= 4)
                     _tempList.Add(t);
 
                 if (_tempList.Count == 4)
+                {
+                    value = _tempList[0].Value + 13 * 9;
                     return _tempList;
+                }
             }
-
+            value = 0;
             return new List<Card>();
         }
 
-        private List<Card> IsFullHouse(List<Card> hList) //Three cards of the same rank, and two cards of
+        private List<Card> IsFullHouse(List<Card> hList, out int value) //Three cards of the same rank, and two cards of
         {
             int cardCount;
             _tempList.Clear();
@@ -208,84 +240,124 @@ namespace HoldemHand.Model
             foreach (var t in hList)
             {
                 cardCount = hList.Count(card => card.Value == t.Value);
-                if (cardCount == 3)
+                if (cardCount >= 3)
                     _tempList.Add(t);
+                if (_tempList.Count == 3)
+                    break;
             }
             if (_tempList.Count == 0)
+            {
+                value = 0;
                 return new List<Card>();
+            }
+            value = _tempList[0].Value + 13 * 7;
 
             var hList2 = (hList.Except(_tempList)).ToList();
             foreach (var t in hList2)
             {
                 cardCount = hList2.Count(card => card.Value == t.Value);
-                if (cardCount == 2)
+                if (cardCount >= 2)
                     tempList2.Add(t);
+                if (tempList2.Count == 2)
+                    break;
             }
             if (tempList2.Count == 0)
+            {
+                value = 0;
                 return new List<Card>();
-
+            }
+            value += tempList2[0].Value;
             _tempList.AddRange(tempList2);
 
             return _tempList;
         }
 
-        private List<Card> IsFlush(List<Card> hList) //Five cards of the same suit.
+        private List<Card> IsFlush(List<Card> hList, out int value) //Five cards of the same suit.
         {
             _tempList.Clear();
 
             foreach (var t in hList)
             {
                 var cardCount = hList.Count(card => card.Suit == t.Suit);
-                if (cardCount == 5)
+                if (cardCount >= 5)
                     _tempList.Add(t);
                 if (_tempList.Count == 5)
+                {
+                    value = _tempList[0].Value + 13 * 6;
                     return _tempList;
+                }
             }
-
+            value = 0;
             return new List<Card>();
         }
 
-        private List<Card> IsStraight(List<Card> hList) //Five cards in sequence.
+        private List<Card> IsStraight(List<Card> hList, out int value) //Five cards in sequence.
         {
             var st = 0;
             _tempList.Clear();
-            _sortedList = hList;
-            for (var i = 0; i < _sortedList.Count - 1; i++)
+            for (var i = 0; i < hList.Count - 1; i++)
             {
-                if (_sortedList[i].Value != _sortedList[i + 1].Value)
-                    if ((_sortedList[i].Value - _sortedList[i + 1].Value) == 1)
+                if (hList[i].Value != hList[i + 1].Value)
+                    if ((hList[i].Value - hList[i + 1].Value) == 1)
                     {
                         st++;
-                        _tempList.Add(_sortedList[i]);
+                        _tempList.Add(hList[i]);
                     }
                     else
                         st = 0;
                 if (st == 4)
                 {
-                    _tempList.Add(_sortedList[i + 1]);
+                    _tempList.Add(hList[i + 1]);
+                    value = _tempList[0].Value + 13 * 5;
                     return _tempList;
                 }
             }
+
+            st = 0;
+            _tempList.Clear();
+
+            if (hList[0].Value == 13) //Ace
+                for (int i = hList.Count - 1, j = 0; i > 0; i--, j++)
+                {
+                    if (hList[i].Value != hList[0].Value)
+                        if ((hList[0].Value - hList[i].Value) == 12 - j)
+                        {
+                            st++;
+                            _tempList.Add(hList[i]);
+                        }
+                        else
+                            st = 0;
+                    if (st == 5)
+                    {
+                        value = 1 + 13 * 5;
+                        return _tempList;
+                    }
+                }
+            value = 0;
             return new List<Card>();
         }
 
 
-        private List<Card> IsThreeKind(List<Card> hList) //Three cards of the same rank, and two 
+        private List<Card> IsThreeKind(List<Card> hList, out int value) //Three cards of the same rank, and two 
         {                                               //unrelated side cards
             _tempList.Clear();
 
             foreach (var t in hList)
             {
                 var cardCount = hList.Count(card => card.Value == t.Value);
-                if (cardCount == 3)
+                if (cardCount >= 3)
                     _tempList.Add(t);
                 if (_tempList.Count == 3)
+                {
+                    value = _tempList[0].Value + 13 * 4;
                     return _tempList;
+                }
             }
+            value = 0;
             return new List<Card>();
         }
 
-        private List<Card> IsTwoPair(List<Card> hList) //Two cards of a matching rank, another two cards of a different 
+        private List<Card> IsTwoPair(List<Card> hList, out int value) //Two cards of a matching rank, another two cards of a different 
         {                                             //matching rank, and one side card.
             int cardCount;
             _tempList.Clear();
@@ -294,51 +366,62 @@ namespace HoldemHand.Model
             foreach (var t in hList)
             {
                 cardCount = hList.Count(card => card.Value == t.Value);
-                if (cardCount == 2)
+                if (cardCount >= 2)
                     _tempList.Add(t);
                 if (_tempList.Count == 2)
                     break;
             }
             if (_tempList.Count < 2)
+            {
+                value = 0;
                 return new List<Card>();
+            }
+            value = _tempList[0].Value + 13 * 2;
 
             var hList2 = (hList.Except(_tempList)).ToList();
 
             foreach (var t in hList2)
             {
                 cardCount = hList2.Count(card => card.Value == t.Value);
-                if (cardCount == 2)
+                if (cardCount >= 2)
                     tempList2.Add(t);
                 if (tempList2.Count == 2)
                     break;
             }
             if (tempList2.Count != 2)
+            {
+                value = 0;
                 return new List<Card>();
-
+            }
+            value += tempList2[0].Value;
             _tempList.AddRange(tempList2);
 
             return _tempList;
         }
 
-
-        private List<Card> IsOnePair(List<Card> hList) //Two cards of a matching rank, and three unrelated side cards.
+        private List<Card> IsOnePair(List<Card> hList, out int value) //Two cards of a matching rank, and three unrelated side cards.
         {
             _tempList.Clear();
 
             foreach (var t in hList)
             {
                 var cardCount = hList.Count(card => card.Value == t.Value);
-                if (cardCount == 2)
+                if (cardCount >= 2)
                     _tempList.Add(t);
                 if (_tempList.Count == 2)
+                {
+                    value = _tempList[0].Value + 13;
                     return _tempList;
+                }
             }
+            value = 0;
             return new List<Card>();
         }
 
-        private List<Card> HighCard(List<Card> hList)
+        private List<Card> HighCard(List<Card> hList, out int value)
         {
             _tempList.Add(hList[0]);
+            value = hList[0].Value;
             return _tempList;
         }
     }

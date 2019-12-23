@@ -28,12 +28,16 @@ namespace HoldemHand
                             hands.Add(hand);
                         }
                     else if (amountOfPlayers + 2 == substrings.Count)
-                        for (var i = 2; i < amountOfPlayers + 2; i++)// <hand N> if it is specified 
-                        {
-                            var hand = new Hand();
-                            Table.DealManyCardsTo(hand, substrings[i]);
-                            hands.Add(hand);
-                        }
+                        if(amountOfPlayers >= 1 && amountOfPlayers <= 256)
+                            for (var i = 2; i < amountOfPlayers + 2; i++)// <hand N> if it is specified 
+                            {
+                                var hand = new Hand();
+                                Table.DealManyCardsTo(hand, substrings[i]);
+                                hands.Add(hand);
+                            }
+                        else
+                            throw new ArgumentOutOfRangeException
+                                (nameof(amountOfPlayers), $"{nameof(amountOfPlayers)} is an integer from 1 to 256 which represents how many hands are to be compared");
                     else
                         throw new ArgumentOutOfRangeException
                             (nameof(substrings), "Incorrect input. check if the number of hands is the same as the number of hands you have inputted, or input your hands without specifying the number");
@@ -44,10 +48,11 @@ namespace HoldemHand
                                         table.DisplayCards(bestHands[i - 1].Item2.Cards())
                                         + (bestHands[i].Item1 == bestHands[i - 1].Item1 ? "=" : " ")
                                         + (i == bestHands.Count - 1 ? table.DisplayCards(bestHands[i].Item2.Cards()) : ""));
-                    Console.Out.WriteLine();
+                    if (Console.In.Peek() != -1)  
+                        Console.Out.WriteLine();
                 }
                 catch (ArgumentOutOfRangeException e) { Console.Out.WriteLine(e.Message); }
-                catch (ArgumentException e) { Console.WriteLine(e.Message); }
+                catch (ArgumentException e) { Console.Out.WriteLine(e.Message); }
 
             }
         }
