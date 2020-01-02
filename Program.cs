@@ -1,14 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 using HoldemHand.Model;
 
 namespace HoldemHand
 {
     internal static class Program
     {
+        private static bool _isOmaha = false;
         private static void Main(string[] args)
         {
+            if (args.Length != 0 && args[0] == "--omaha")
+                _isOmaha = true;
+            
             string inputString;
             while ((inputString = Console.In.ReadLine()) != null)
             {
@@ -41,9 +46,20 @@ namespace HoldemHand
                         throw new ArgumentOutOfRangeException
                             (nameof(substrings), "Incorrect input. check if the number of hands is the same as the number of hands you have inputted, or input your hands without specifying the number");
 
-                    var bestHands = table.EvaluateManyHands(hands);
+                    foreach (var hand in hands)
+                    {
+                        if(_isOmaha)
+                            if(hand.Cards().Count != 4)
+                                throw new ArgumentOutOfRangeException
+                                    (nameof(hand), $"Each player is dealt four cards in Omaha");
+                        if(!_isOmaha)
+                            if(hand.Cards().Count != 2)
+                                throw new ArgumentOutOfRangeException
+                                    (nameof(hand), $"Each player is dealt two cards in Texas Holdem");
+                    }
+                    var bestHands = _isOmaha ? table.EvaluateManyHandsOmaha(hands) : table.EvaluateManyHands(hands);
 
-                    for(int i = 0; i < bestHands.Count; i++)
+                    for(var i = 0; i < bestHands.Count; i++)
                         Console.Write(
                         table.DisplayCards(bestHands[i].Item2.Cards())
                         + (bestHands[i].Item1 == 1 ? "=" : (i != bestHands.Count - 1 ? " " : "")));

@@ -13,10 +13,13 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <Compile Include = "Model\Card.cs"/>
-    <Compile Include = "Model\Hand.cs"/>
-    <Compile Include = "Model\Table.cs"/>
-    <Compile Include = "Program.cs"/>
+    <Compile Include="Helpers\Permutations.cs" />
+    <Compile Include="Model\Card.cs" />
+    <Compile Include="Model\Hand.cs" />
+    <Compile Include="Model\Table.cs" />
+    <Compile Include="Model\Table.EvaluateHand.cs" />
+    <Compile Include="Model\Table.EvaluateManyHands.cs" />
+    <Compile Include="Program.cs" />
   </ItemGroup>
   
 </Project>
